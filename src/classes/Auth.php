@@ -38,18 +38,18 @@ class Auth {
             $userRoleEnum = UserRole::from($userData['role']);
 
             if (!$userRoleEnum) {
-                // Invalid role in users.json, should not happen with correct data
                 return false;
             }
 
-            // Use fullName from userData, fallback to username if not present
             $fullName = $userData['fullName'] ?? $userData['username'];
+            $associatedVendorName = $userData['associated_vendor_name'] ?? null; // Get from users.json or default to null
 
             $loggedInUser = new User(
                 $userData['username'],
                 $userData['password'], // This is the HASHED password from users.json
                 $userRoleEnum,
-                $fullName // Pass fullName to User constructor
+                $fullName, // Pass fullName to User constructor
+                $associatedVendorName // Pass associated vendor name
             );
 
             $_SESSION['user'] = $loggedInUser; // Store the User object

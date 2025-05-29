@@ -85,17 +85,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $newStatus = $_POST['new_status'] ?? null;
 
     if ($poIdToUpdate && $newStatus) {
-        if ($poManager->updatePurchaseOrderStatus($poIdToUpdate, $newStatus, $user->getUsername())) {
-            $feedbackMessage = "Purchase Order #{$poIdToUpdate} status updated to '{$newStatus}'.";
-            $feedbackType = "success";
+        // Optional: Add a check here to ensure the transition is valid.
+        // For "Send to Vendor", the current status should ideally be "Draft".
+        $currentPo = $poManager->getPurchaseOrderById($poIdToUpdate);
+        if ($currentPo && $newStatus === PurchaseOrderManager::STATUS_SENT_TO_VENDOR && $currentPo['status'] !== PurchaseOrderManager::STATUS_DRAFT) {
+            $_SESSION['feedback_message'] = "Purchase Order #{$poIdToUpdate} cannot be sent to vendor. Current status: {$currentPo['status']}.";
+            $_SESSION['feedback_type'] = "warning";
         } else {
-            $feedbackMessage = "Failed to update status for Purchase Order #{$poIdToUpdate}.";
-            $feedbackType = "danger";
+            if ($poManager->updatePurchaseOrderStatus($poIdToUpdate, $newStatus, $user->getUsername())) {
+                $_SESSION['feedback_message'] = "Purchase Order #{$poIdToUpdate} status updated to '{$newStatus}'.";
+                $_SESSION['feedback_type'] = "success";
+            } else {
+                $_SESSION['feedback_message'] = "Failed to update status for Purchase Order #{$poIdToUpdate}.";
+                $_SESSION['feedback_type'] = "danger";
+            }
         }
+    } else {
+        $_SESSION['feedback_message'] = "Invalid request to update PO status.";
+        $_SESSION['feedback_type'] = "danger";
     }
+    // Redirect to prevent form resubmission
+    header("Location: index.php");
+    exit();
 }
 
-// Feedback from other pages (like receive_po.php)
+// Handle PO Deletion
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'delete_po') {
+    $poIdToDelete = $_POST['po_id_delete'] ?? null;
+
+    if ($poIdToDelete) {
+        $deleteResult = $poManager->deletePurchaseOrder($poIdToDelete, $user->getUsername());
+        $_SESSION['feedback_message'] = $deleteResult['message'];
+        $_SESSION['feedback_type'] = $deleteResult['success'] ? "success" : "danger";
+    } else {
+        $_SESSION['feedback_message'] = "Invalid request to delete PO.";
+        $_SESSION['feedback_type'] = "danger";
+    }
+    // Redirect to prevent form resubmission
+    header("Location: index.php");
+    exit();
+}
+
+
+// Feedback from other pages (like receive_po.php) or from PRG redirects
 if (isset($_SESSION['feedback_message'])) {
     $feedbackMessage = $_SESSION['feedback_message'];
     $feedbackType = $_SESSION['feedback_type'];
@@ -175,8 +207,8 @@ $allProducts = $inventoryManager->getAllProducts(); // For inventory table and J
                     <div class="mb-3">
                         <label for="product_search_po" class="form-label">Search or List Products from Selected Vendor:</label>
                         <div class="input-group">
-                            <input type="text" class="form-control" id="product_search_po" placeholder="Select a vendor first..." disabled>
-                            <button class="btn btn-outline-secondary" type="button" id="toggle_list_vendor_products_btn" title="Toggle list of all products from this vendor" disabled>
+                            <input type="text" class="form-control mb-1" id="product_search_po" placeholder="Select a vendor first..." disabled>
+                            <button class="btn btn-outline-secondary mb-1 mt-0" type="button" id="toggle_list_vendor_products_btn" title="Toggle list of all products from this vendor" disabled>
                                 <span class="material-symbols-outlined">arrow_drop_down</span>
                             </button>
                         </div>
@@ -248,7 +280,7 @@ $allProducts = $inventoryManager->getAllProducts(); // For inventory table and J
                                         </td>
                                         <td>
                                             <?php if ($po['status'] === PurchaseOrderManager::STATUS_DRAFT): ?>
-                                                <form action="index.php" method="POST" class="d-inline">
+                                                <form action="index.php" method="POST" class="d-inline me-1">
                                                     <input type="hidden" name="action" value="update_po_status">
                                                     <input type="hidden" name="po_id" value="<?php echo htmlspecialchars($po['po_id']); ?>">
                                                     <input type="hidden" name="new_status" value="<?php echo PurchaseOrderManager::STATUS_SENT_TO_VENDOR; ?>">
@@ -256,12 +288,20 @@ $allProducts = $inventoryManager->getAllProducts(); // For inventory table and J
                                                         <span class="material-symbols-outlined">send</span>
                                                     </button>
                                                 </form>
-                                            <?php elseif (in_array($po['status'], [PurchaseOrderManager::STATUS_SENT_TO_VENDOR, PurchaseOrderManager::STATUS_PARTIALLY_RECEIVED])): ?>
+                                                <button type="button" class="btn btn-sm btn-danger" 
+                                                        data-bs-toggle="modal" 
+                                                        data-bs-target="#deletePoModal"
+                                                        data-po-id-delete="<?php echo htmlspecialchars($po['po_id']); ?>"
+                                                        data-po-vendor-delete="<?php echo htmlspecialchars($po['vendor_name']); ?>"
+                                                        title="Delete Draft PO">
+                                                    <span class="material-symbols-outlined">delete</span>
+                                                </button>
+                                            <?php elseif (in_array($po['status'], [PurchaseOrderManager::STATUS_SHIPPED, PurchaseOrderManager::STATUS_PARTIALLY_RECEIVED])): ?>
                                                 <a href="receive_po.php?po_id=<?php echo htmlspecialchars($po['po_id']); ?>" class="btn btn-sm btn-success" title="Receive Items">
                                                     <span class="material-symbols-outlined">inventory</span>
                                                 </a>
-                                            <?php elseif ($po['status'] === PurchaseOrderManager::STATUS_RECEIVED): ?>
-                                                <a href="view_po_receipt.php?po_id=<?php echo htmlspecialchars($po['po_id']); ?>" class="btn btn-sm btn-secondary" title="View Receipt">
+                                            <?php elseif ($po['status'] === PurchaseOrderManager::STATUS_RECEIVED || $po['status'] === PurchaseOrderManager::STATUS_CANCELLED): ?>
+                                                <a href="view_po_receipt.php?po_id=<?php echo htmlspecialchars($po['po_id']); ?>" class="btn btn-sm btn-secondary" title="View Details">
                                                     <span class="material-symbols-outlined">receipt_long</span>
                                                 </a>
                                             <?php endif; ?>
@@ -321,6 +361,83 @@ $allProducts = $inventoryManager->getAllProducts(); // For inventory table and J
             </div>
         </div>
 
+    </div>
+
+    <!-- Create New PO Modal -->
+    <div class="modal fade" id="createPoModal" tabindex="-1" aria-labelledby="createPoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="index.php" method="POST" id="modalCreatePoForm">
+                    <input type="hidden" name="action" value="create_po">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createPoModalLabel">Create New Purchase Order</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="modal_vendor_name" class="form-label">Vendor:</label>
+                            <select class="form-select" id="modal_vendor_name" name="vendor_name" required>
+                                <option value="">Select a vendor...</option>
+                                <?php foreach ($vendorsForDropdown as $vendorOption): ?>
+                                    <option value="<?php echo htmlspecialchars($vendorOption); ?>"><?php echo htmlspecialchars($vendorOption); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="modal_product_search" class="form-label">Search Products:</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="modal_product_search" placeholder="Search for products..." disabled>
+                                <button class="btn btn-outline-secondary" type="button" id="modal_toggle_list_vendor_products_btn" title="Toggle list of all products from this vendor" disabled>
+                                    <span class="material-symbols-outlined">arrow_drop_down</span>
+                                </button>
+                            </div>
+                            <div id="modal_po-search-results" class="list-group"></div>
+                        </div>
+
+                        <h5>Items to Order:</h5>
+                        <div id="modal_po-items-container" class="mb-3">
+                            <p class="text-muted" id="modal_po-items-placeholder">No items added yet. Select a vendor and search products.</p>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="modal_notes" class="form-label">Notes:</label>
+                            <textarea class="form-control" id="modal_notes" name="notes" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="material-symbols-outlined">save</span> Create Purchase Order
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete PO Confirmation Modal -->
+    <div class="modal fade" id="deletePoModal" tabindex="-1" aria-labelledby="deletePoModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="index.php" method="POST">
+                    <input type="hidden" name="action" value="delete_po">
+                    <input type="hidden" name="po_id_delete" id="modal_po_id_delete" value="">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deletePoModalLabel">Confirm Delete Purchase Order</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete Draft Purchase Order #<strong id="modal_po_id_delete_display"></strong> for vendor <strong id="modal_po_vendor_delete_display"></strong>?</p>
+                        <p class="text-danger">This action cannot be undone.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">Delete PO</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -465,6 +582,163 @@ $allProducts = $inventoryManager->getAllProducts(); // For inventory table and J
                 }
             });
         });
+
+        // JavaScript for Create PO Modal
+        document.addEventListener('DOMContentLoaded', function() {
+            const modalVendorSelect = document.getElementById('modal_vendor_name');
+            const modalProductSearchInput = document.getElementById('modal_product_search');
+            const modalToggleListButton = document.getElementById('modal_toggle_list_vendor_products_btn');
+            const modalSearchResultsContainer = document.getElementById('modal_po-search-results');
+            const modalPoItemsContainer = document.getElementById('modal_po-items-container');
+            const modalPoItemsPlaceholder = document.getElementById('modal_po-items-placeholder');
+
+            let modalCurrentSelectedVendor = null;
+            let modalPoItemIndex = 0;
+            let modalIsListAllActive = false;
+
+            function modalDisplayProductsInResults(productsToList) {
+                modalSearchResultsContainer.innerHTML = '';
+                if (productsToList.length > 0) {
+                    productsToList.forEach(product => {
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'list-group-item list-group-item-action';
+                        btn.innerHTML = `${product.name} (SKU: ${product.sku})`;
+                        btn.dataset.sku = product.sku;
+                        btn.dataset.name = product.name;
+                        btn.addEventListener('click', function() {
+                            modalAddSkuToPoForm(this.dataset.sku, this.dataset.name);
+                        });
+                        modalSearchResultsContainer.appendChild(btn);
+                    });
+                } else {
+                    modalSearchResultsContainer.innerHTML = '<div class="list-group-item text-muted">No products found.</div>';
+                }
+            }
+
+            modalVendorSelect.addEventListener('change', function() {
+                const selectedVendorName = this.value;
+                modalCurrentSelectedVendor = vendorsData.find(v => v.name === selectedVendorName);
+
+                modalPoItemsContainer.innerHTML = ''; // Clear existing items when vendor changes
+                modalPoItemIndex = 0; // Reset index
+                modalProductSearchInput.value = '';
+                modalSearchResultsContainer.innerHTML = '';
+                modalPoItemsPlaceholder.style.display = 'block';
+                modalIsListAllActive = false; 
+                modalToggleListButton.innerHTML = '<span class="material-symbols-outlined">arrow_drop_down</span>';
+
+
+                if (modalCurrentSelectedVendor && modalCurrentSelectedVendor.provided_skus) {
+                    modalProductSearchInput.disabled = false;
+                    modalToggleListButton.disabled = false;
+                    modalProductSearchInput.placeholder = `Search products from ${modalCurrentSelectedVendor.name}...`;
+                } else {
+                    modalProductSearchInput.disabled = true;
+                    modalToggleListButton.disabled = true;
+                    modalProductSearchInput.placeholder = 'Select a vendor first...';
+                    modalCurrentSelectedVendor = null;
+                }
+            });
+
+            modalProductSearchInput.addEventListener('input', function() {
+                const searchTerm = this.value.trim().toLowerCase();
+                modalIsListAllActive = false; 
+                modalToggleListButton.innerHTML = '<span class="material-symbols-outlined">arrow_drop_down</span>';
+                
+                if (!modalCurrentSelectedVendor || !modalCurrentSelectedVendor.provided_skus) {
+                    modalSearchResultsContainer.innerHTML = '';
+                    return;
+                }
+                if (searchTerm.length < 1) { 
+                    modalSearchResultsContainer.innerHTML = '';
+                    return;
+                }
+
+                const vendorSkus = modalCurrentSelectedVendor.provided_skus.map(s => String(s).toLowerCase());
+                const filteredProducts = productsData.filter(p => {
+                    const productSkuLower = String(p.sku).toLowerCase();
+                    return vendorSkus.includes(productSkuLower) &&
+                           (productSkuLower.includes(searchTerm) || String(p.name).toLowerCase().includes(searchTerm));
+                });
+                modalDisplayProductsInResults(filteredProducts);
+            });
+
+            modalToggleListButton.addEventListener('click', function() {
+                if (!modalCurrentSelectedVendor || !modalCurrentSelectedVendor.provided_skus) {
+                    modalSearchResultsContainer.innerHTML = '<div class="list-group-item text-muted">Please select a vendor first.</div>';
+                    return;
+                }
+
+                if (modalIsListAllActive) {
+                    modalSearchResultsContainer.innerHTML = ''; 
+                    modalIsListAllActive = false;
+                    this.innerHTML = '<span class="material-symbols-outlined">arrow_drop_down</span>';
+                } else {
+                    modalProductSearchInput.value = ''; 
+                    const vendorSkus = modalCurrentSelectedVendor.provided_skus.map(s => String(s).toLowerCase());
+                    const allVendorProducts = productsData.filter(p => vendorSkus.includes(String(p.sku).toLowerCase()));
+                    modalDisplayProductsInResults(allVendorProducts);
+                    modalIsListAllActive = true;
+                    this.innerHTML = '<span class="material-symbols-outlined">arrow_drop_up</span>'; 
+                }
+            });
+
+            function modalAddSkuToPoForm(sku, productName) {
+                const existingSkus = Array.from(modalPoItemsContainer.querySelectorAll('input[name$="[sku]"]')).map(input => input.value);
+                if (existingSkus.includes(sku)) {
+                    alert(`Product ${productName} (SKU: ${sku}) is already in the list. Please adjust its quantity if needed.`);
+                    const existingQtyInput = modalPoItemsContainer.querySelector(`input[name="items[${existingSkus.indexOf(sku)}][quantity]"]`);
+                    if(existingQtyInput) existingQtyInput.focus();
+                    return;
+                }
+                
+                modalPoItemsPlaceholder.style.display = 'none';
+
+                const newItemRow = document.createElement('div');
+                newItemRow.className = 'item-row mb-2';
+                newItemRow.innerHTML = `
+                    <input type="hidden" name="items[${modalPoItemIndex}][sku]" value="${sku}">
+                    <input type="hidden" name="items[${modalPoItemIndex}][product_name]" value="${productName}">
+                    <div class="flex-grow-1">
+                        <strong>${productName}</strong><br><small class="text-muted">SKU: ${sku}</small>
+                    </div>
+                    <input type="number" name="items[${modalPoItemIndex}][quantity]" class="form-control form-control-sm ms-2" placeholder="Qty" min="1" style="width: 80px;" required>
+                    <button type="button" class="btn btn-danger btn-sm remove-po-item-btn ms-2" title="Remove Item">
+                        <span class="material-symbols-outlined" style="font-size: 1em; vertical-align: middle;">delete</span>
+                    </button>
+                `;
+                modalPoItemsContainer.appendChild(newItemRow);
+                modalPoItemIndex++;
+            }
+
+            modalPoItemsContainer.addEventListener('click', function(e) {
+                if (e.target.closest('.remove-po-item-btn')) {
+                    e.target.closest('.item-row').remove();
+                    if (modalPoItemsContainer.children.length === 0) {
+                        modalPoItemsPlaceholder.style.display = 'block';
+                    }
+                }
+            });
+        });
+
+        // JavaScript to set PO ID in the Delete PO modal
+        var deletePoModal = document.getElementById('deletePoModal');
+        if (deletePoModal) {
+            deletePoModal.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget; // Button that triggered the modal
+                var poId = button.getAttribute('data-po-id-delete');
+                var vendorName = button.getAttribute('data-po-vendor-delete');
+                
+                var modalPoIdInput = deletePoModal.querySelector('#modal_po_id_delete');
+                var modalPoIdDisplay = deletePoModal.querySelector('#modal_po_id_delete_display');
+                var modalPoVendorDisplay = deletePoModal.querySelector('#modal_po_vendor_delete_display');
+                
+                modalPoIdInput.value = poId;
+                modalPoIdDisplay.textContent = poId;
+                modalPoVendorDisplay.textContent = vendorName;
+            });
+        }
     </script>
 </body>
 </html>

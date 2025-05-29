@@ -70,5 +70,15 @@
         "action": "time_in",
         "role": "Cashier",
         "timestamp": "2025-05-29 20:24:19"
+    },
+    {
+        "username": "stocker1",
+        "action": "time_in",
+        "timestamp": "2025-05-30 04:07:04"
+    },
+    {
+        "username": "stocker1",
+        "action": "time_out",
+        "timestamp": "2025-05-30 04:07:14"
     }
 ]

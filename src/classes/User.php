@@ -6,12 +6,14 @@ class User {
     private string $hashedPassword; // Stores the hashed password
     private UserRole $role;         // Stores the UserRole enum instance
     private string $fullName;       // New property for full name
+    private ?string $associatedVendorName; // New property for vendor association
 
-    public function __construct(string $username, string $hashedPassword, UserRole $role, string $fullName) {
+    public function __construct(string $username, string $hashedPassword, UserRole $role, string $fullName, ?string $associatedVendorName = null) {
         $this->username = $username;
         $this->hashedPassword = $hashedPassword;
         $this->role = $role;
         $this->fullName = $fullName; // Assign full name
+        $this->associatedVendorName = $associatedVendorName; // Assign associated vendor name
     }
 
     public function getUsername(): string {
@@ -23,9 +25,11 @@ class User {
     }
 
     public function getFullName(): string {
-        // With __wakeup, this direct return should be safe.
-        // The error occurs if $this->fullName is accessed before initialization.
         return $this->fullName;
+    }
+
+    public function getAssociatedVendorName(): ?string { // Getter for associated vendor name
+        return $this->associatedVendorName;
     }
 
     public function authenticate(string $inputPassword): bool {
@@ -38,12 +42,12 @@ class User {
      */
     public function __wakeup()
     {
-        // If fullName is not set (e.g., from an older session object where the property didn't exist),
-        // initialize it. We default to username as a safe fallback.
-        // The Auth class already handles defaulting fullName to username if not in users.json during a fresh login.
-        // This addresses the case of an uninitialized typed property after unserialization.
         if (!isset($this->fullName)) {
             $this->fullName = $this->username;
+        }
+        // Initialize associatedVendorName if it's not set (for older session objects)
+        if (!isset($this->associatedVendorName)) {
+            $this->associatedVendorName = null;
         }
     }
 }

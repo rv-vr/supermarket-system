@@ -15,12 +15,18 @@ if (!isset($_SESSION['user']) || !($_SESSION['user'] instanceof User)) {
 }
 
 $user = $_SESSION['user'];
+$userRole = $user->getRole();
 
-// Allow Stockers and potentially Admins to view receipts
-if (!in_array($user->getRole(), [UserRole::Stocker, UserRole::Manager])) {
+// Allow Stockers, Managers, and Vendors to view receipts
+if (!in_array($userRole, [UserRole::Stocker, UserRole::Manager, UserRole::Vendor])) {
     $_SESSION['feedback_message'] = 'Access Denied. You do not have permission to view receipts.';
     $_SESSION['feedback_type'] = 'danger';
-    header('Location: index.php'); // Or a general access denied page
+    // Redirect based on role or to a generic access denied page
+    if ($userRole === UserRole::Vendor) {
+        header('Location: ../vendor/index.php');
+    } else {
+        header('Location: index.php');
+    }
     exit();
 }
 
@@ -31,7 +37,11 @@ $poId = $_GET['po_id'] ?? null;
 if (!$poId) {
     $_SESSION['feedback_message'] = 'No Purchase Order ID provided for receipt.';
     $_SESSION['feedback_type'] = 'danger';
-    header('Location: index.php');
+    if ($userRole === UserRole::Vendor) {
+        header('Location: ../vendor/index.php');
+    } else {
+        header('Location: index.php');
+    }
     exit();
 }
 
@@ -40,13 +50,29 @@ $poDetails = $poManager->getPurchaseOrderById($poId);
 if (!$poDetails) {
     $_SESSION['feedback_message'] = "Purchase Order #{$poId} not found.";
     $_SESSION['feedback_type'] = 'danger';
-    header('Location: index.php');
+    if ($userRole === UserRole::Vendor) {
+        header('Location: ../vendor/index.php');
+    } else {
+        header('Location: index.php');
+    }
     exit();
 }
 
+// If the user is a Vendor, ensure the PO belongs to them
+if ($userRole === UserRole::Vendor) {
+    $loggedInVendorName = $user->getAssociatedVendorName();
+    if (empty($loggedInVendorName) || $poDetails['vendor_name'] !== $loggedInVendorName) {
+        $_SESSION['feedback_message'] = 'Access Denied. You can only view Purchase Orders associated with your vendor account.';
+        $_SESSION['feedback_type'] = 'danger';
+        header('Location: ../vendor/index.php');
+        exit();
+    }
+}
+
+
 // It's good practice to ensure the PO is in a state where a receipt makes sense,
 // e.g., Received, Partially Received, or even Cancelled if you want a record.
-// For now, we'll allow viewing if the PO exists.
+// For now, we'll allow viewing if the PO exists and passes above checks.
 
 ?>
 <!DOCTYPE html>
@@ -55,6 +81,7 @@ if (!$poDetails) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="../../public/css/styles.css"> <!-- Your main styles -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <title>Purchase Order Receipt - <?php echo htmlspecialchars($poId); ?></title>
     <style>
@@ -207,6 +234,16 @@ if (!$poDetails) {
                         <?php if (isset($log['notes']) && !empty($log['notes'])): ?>
                             <small class="text-muted">Notes: <?php echo nl2br(htmlspecialchars($log['notes'])); ?></small>
                         <?php endif; ?>
+                         <?php // Display delivery reference and transit notes if they exist (added for vendor shipment)
+                            if (isset($log['delivery_reference'])): ?>
+                            <small class="text-muted d-block">Delivery Ref: <?php echo htmlspecialchars($log['delivery_reference']); ?></small>
+                        <?php endif; ?>
+                        <?php if (isset($log['transit_notes'])): ?>
+                            <small class="text-muted d-block">Transit Notes: <?php echo nl2br(htmlspecialchars($log['transit_notes'])); ?></small>
+                        <?php endif; ?>
+                        <?php if (isset($log['cancellation_reason'])): // Display cancellation reason ?>
+                            <small class="text-danger d-block">Cancellation Reason: <?php echo nl2br(htmlspecialchars($log['cancellation_reason'])); ?></small>
+                        <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -214,7 +251,12 @@ if (!$poDetails) {
 
         <div class="text-center mt-4 no-print">
             <button class="btn btn-primary" onclick="window.print();"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: 1.2em; margin-right: 0.25em;">print</span> Print Details</button>
-            <a href="index.php" class="btn btn-secondary"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: 1.2em; margin-right: 0.25em;">arrow_back</span> Back to Inventory</a>
+            <?php // Adjust back button based on user role ?>
+            <?php if ($userRole === UserRole::Vendor): ?>
+                <a href="../vendor/index.php" class="btn btn-secondary"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: 1.2em; margin-right: 0.25em;">arrow_back</span> Back to Vendor Portal</a>
+            <?php else: ?>
+                <a href="index.php" class="btn btn-secondary"><span class="material-symbols-outlined" style="vertical-align: middle; font-size: 1.2em; margin-right: 0.25em;">arrow_back</span> Back to Inventory</a>
+            <?php endif; ?>
         </div>
     </div>
 

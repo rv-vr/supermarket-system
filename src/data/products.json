@@ -7,12 +7,12 @@
         "category": "Fruits",
         "price": 2.99,
         "cost_price": 1.5,
-        "stock_quantity": 150,
+        "stock_quantity": 173,
         "reorder_level": 20,
         "supplier_info": "Green Farms Ltd.",
         "default_vendor_name": "Green Farms Ltd.",
         "date_added": "2024-01-10",
-        "last_updated": "2024-05-20"
+        "last_updated": "2025-05-30 03:40:20"
     },
     {
         "sku": "MILK001",
@@ -37,11 +37,11 @@
         "category": "Bakery",
         "price": 2.5,
         "cost_price": 1.2,
-        "stock_quantity": 60,
+        "stock_quantity": 106,
         "reorder_level": 10,
         "supplier_info": "Bakery Delights",
         "default_vendor_name": "Bakery Delights",
         "date_added": "2024-01-20",
-        "last_updated": "2024-05-21"
+        "last_updated": "2025-05-30 03:47:23"
     }
 ]

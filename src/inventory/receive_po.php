@@ -45,9 +45,9 @@ if (!$poDetails) {
     exit();
 }
 
-// Allow receiving only if PO is 'Sent to Vendor' or 'Partially Received'
-if (!in_array($poDetails['status'], [PurchaseOrderManager::STATUS_SENT_TO_VENDOR, PurchaseOrderManager::STATUS_PARTIALLY_RECEIVED])) {
-    $_SESSION['feedback_message'] = "Purchase Order #{$poId} is not in a receivable state (current status: {$poDetails['status']}).";
+// Allow receiving only if PO is 'Shipped' or 'Partially Received'
+if (!in_array($poDetails['status'], [PurchaseOrderManager::STATUS_SHIPPED, PurchaseOrderManager::STATUS_PARTIALLY_RECEIVED])) {
+    $_SESSION['feedback_message'] = "Purchase Order #{$poId} is not in a receivable state (current status: {$poDetails['status']}). Must be 'Shipped' or 'Partially Received'.";
     $_SESSION['feedback_type'] = 'warning';
     header('Location: index.php');
     exit();

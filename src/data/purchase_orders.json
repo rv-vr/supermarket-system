@@ -24,5 +24,237 @@
                 "status_change": "Received"
             }
         ]
+    },
+    {
+        "po_id": "PO-20250530-031952-40DC",
+        "vendor_name": "Green Farms Ltd.",
+        "order_date": "2025-05-30 03:19:52",
+        "requested_by": "stocker1",
+        "status": "Received",
+        "items": [
+            {
+                "sku": "APP001",
+                "product_name": "Fresh Apples (kg)",
+                "quantity_ordered": 23,
+                "quantity_received": 23
+            }
+        ],
+        "history": [
+            {
+                "timestamp": "2025-05-30 03:19:52",
+                "user": "stocker1",
+                "action": "Created PO",
+                "status_change": "Draft"
+            },
+            {
+                "timestamp": "2025-05-30 03:20:00",
+                "user": "stocker1",
+                "action": "Status changed from Draft to Sent to Vendor",
+                "status_change": "Sent to Vendor"
+            },
+            {
+                "timestamp": "2025-05-30 03:22:11",
+                "user": "vendor1",
+                "action": "Status changed from Sent to Vendor to Shipped",
+                "status_change": "Shipped",
+                "notes": "Marked as Shipped by vendor.",
+                "delivery_reference": "PH86YG7P28A12H"
+            },
+            {
+                "timestamp": "2025-05-30 03:39:48",
+                "user": "stocker1",
+                "action": "Items received. No new quantities entered.",
+                "status_change": null,
+                "notes": "ok"
+            },
+            {
+                "timestamp": "2025-05-30 03:40:20",
+                "user": "stocker1",
+                "action": "Items received. Details: APP001 (Qty: 23)",
+                "status_change": "Received",
+                "notes": "ok"
+            }
+        ]
+    },
+    {
+        "po_id": "PO-20250530-032605-26AB",
+        "vendor_name": "Bakery Delights",
+        "order_date": "2025-05-30 03:26:05",
+        "requested_by": "stocker1",
+        "status": "Received",
+        "items": [
+            {
+                "sku": "BRD001",
+                "product_name": "Whole Wheat Bread",
+                "quantity_ordered": 23,
+                "quantity_received": 23
+            }
+        ],
+        "history": [
+            {
+                "timestamp": "2025-05-30 03:26:05",
+                "user": "stocker1",
+                "action": "Created PO",
+                "status_change": "Draft"
+            },
+            {
+                "timestamp": "2025-05-30 03:26:12",
+                "user": "stocker1",
+                "action": "Status changed from Draft to Sent to Vendor",
+                "status_change": "Sent to Vendor"
+            },
+            {
+                "timestamp": "2025-05-30 03:29:01",
+                "user": "bakerydelightsuser",
+                "action": "Status changed from Sent to Vendor to Shipped",
+                "status_change": "Shipped",
+                "notes": "Marked as Shipped by vendor.",
+                "delivery_reference": "ror"
+            },
+            {
+                "timestamp": "2025-05-30 03:47:23",
+                "user": "stocker1",
+                "action": "Items received. Details: BRD001 (Qty: 23)",
+                "status_change": "Received"
+            }
+        ]
+    },
+    {
+        "po_id": "PO-20250530-032606-0E76",
+        "vendor_name": "Bakery Delights",
+        "order_date": "2025-05-30 03:26:06",
+        "requested_by": "stocker1",
+        "status": "Received",
+        "items": [
+            {
+                "sku": "BRD001",
+                "product_name": "Whole Wheat Bread",
+                "quantity_ordered": 23,
+                "quantity_received": 23
+            }
+        ],
+        "history": [
+            {
+                "timestamp": "2025-05-30 03:26:06",
+                "user": "stocker1",
+                "action": "Created PO",
+                "status_change": "Draft"
+            },
+            {
+                "timestamp": "2025-05-30 03:26:19",
+                "user": "stocker1",
+                "action": "Status changed from Draft to Sent to Vendor",
+                "status_change": "Sent to Vendor"
+            },
+            {
+                "timestamp": "2025-05-30 03:28:58",
+                "user": "bakerydelightsuser",
+                "action": "Status changed from Sent to Vendor to Shipped",
+                "status_change": "Shipped",
+                "notes": "Marked as Shipped by vendor.",
+                "delivery_reference": "ror"
+            },
+            {
+                "timestamp": "2025-05-30 03:40:33",
+                "user": "stocker1",
+                "action": "Items received. Details: BRD001 (Qty: 23)",
+                "status_change": "Received",
+                "notes": "ok"
+            }
+        ]
+    },
+    {
+        "po_id": "PO-20250530-034318-68AD",
+        "vendor_name": "Bakery Delights",
+        "order_date": "2025-05-30 03:43:18",
+        "requested_by": "stocker1",
+        "status": "Cancelled",
+        "items": [
+            {
+                "sku": "BRD001",
+                "product_name": "Whole Wheat Bread",
+                "quantity_ordered": 12,
+                "quantity_received": 0
+            }
+        ],
+        "history": [
+            {
+                "timestamp": "2025-05-30 03:43:18",
+                "user": "stocker1",
+                "action": "Created PO",
+                "status_change": "Draft"
+            },
+            {
+                "timestamp": "2025-05-30 03:43:25",
+                "user": "stocker1",
+                "action": "Status changed from Draft to Sent to Vendor",
+                "status_change": "Sent to Vendor"
+            },
+            {
+                "timestamp": "2025-05-30 03:43:49",
+                "user": "bakerydelightsuser",
+                "action": "Status changed from Sent to Vendor to Cancelled",
+                "status_change": "Cancelled",
+                "notes": "Order cancelled by vendor.",
+                "cancellation_reason": "no stock, delayed to 31"
+            },
+            {
+                "timestamp": "2025-05-30 03:43:54",
+                "user": "stocker1",
+                "action": "Status changed from Cancelled to Sent to Vendor",
+                "status_change": "Sent to Vendor"
+            },
+            {
+                "timestamp": "2025-05-30 03:43:58",
+                "user": "stocker1",
+                "action": "Status changed from Sent to Vendor to Sent to Vendor",
+                "status_change": "Sent to Vendor"
+            },
+            {
+                "timestamp": "2025-05-30 03:46:51",
+                "user": "bakerydelightsuser",
+                "action": "Status changed from Sent to Vendor to Cancelled",
+                "status_change": "Cancelled",
+                "notes": "Order cancelled by vendor.",
+                "cancellation_reason": "no"
+            }
+        ]
+    },
+    {
+        "po_id": "PO-20250530-034744-D4D8",
+        "vendor_name": "Bakery Delights",
+        "order_date": "2025-05-30 03:47:44",
+        "requested_by": "stocker1",
+        "status": "Cancelled",
+        "items": [
+            {
+                "sku": "BRD001",
+                "product_name": "Whole Wheat Bread",
+                "quantity_ordered": 1,
+                "quantity_received": 0
+            }
+        ],
+        "history": [
+            {
+                "timestamp": "2025-05-30 03:47:44",
+                "user": "stocker1",
+                "action": "Created PO",
+                "status_change": "Draft"
+            },
+            {
+                "timestamp": "2025-05-30 03:47:46",
+                "user": "stocker1",
+                "action": "Status changed from Draft to Sent to Vendor",
+                "status_change": "Sent to Vendor"
+            },
+            {
+                "timestamp": "2025-05-30 03:47:54",
+                "user": "bakerydelightsuser",
+                "action": "Status changed from Sent to Vendor to Cancelled",
+                "status_change": "Cancelled",
+                "notes": "Order cancelled by vendor.",
+                "cancellation_reason": "no"
+            }
+        ]
     }
 ]
