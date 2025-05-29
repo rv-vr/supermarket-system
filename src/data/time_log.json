@@ -1,0 +1,74 @@
+[
+    {
+        "username": "manager1",
+        "action": "time_in",
+        "role": "Manager",
+        "timestamp": "2025-05-29 12:25:28"
+    },
+    {
+        "username": "manager1",
+        "action": "time_out",
+        "role": "Manager",
+        "timestamp": "2025-05-29 12:25:37"
+    },
+    {
+        "username": "manager1",
+        "action": "time_in",
+        "role": "Manager",
+        "timestamp": "2025-05-29 12:30:58"
+    },
+    {
+        "username": "manager1",
+        "action": "time_out",
+        "role": "Manager",
+        "timestamp": "2025-05-29 12:31:02"
+    },
+    {
+        "username": "manager1",
+        "action": "time_in",
+        "role": "Manager",
+        "timestamp": "2025-05-29 12:31:03"
+    },
+    {
+        "username": "manager1",
+        "action": "time_out",
+        "role": "Manager",
+        "timestamp": "2025-05-29 12:31:03"
+    },
+    {
+        "username": "manager1",
+        "action": "time_out",
+        "role": "Manager",
+        "timestamp": "2025-05-29 12:31:05"
+    },
+    {
+        "username": "cashier1",
+        "action": "time_in",
+        "role": "Cashier",
+        "timestamp": "2025-05-29 14:08:03"
+    },
+    {
+        "username": "cashier1",
+        "action": "time_out",
+        "role": "Cashier",
+        "timestamp": "2025-05-29 14:13:29"
+    },
+    {
+        "username": "cashier1",
+        "action": "time_in",
+        "role": "Cashier",
+        "timestamp": "2025-05-29 20:18:11"
+    },
+    {
+        "username": "cashier1",
+        "action": "time_out",
+        "role": "Cashier",
+        "timestamp": "2025-05-29 20:24:18"
+    },
+    {
+        "username": "cashier1",
+        "action": "time_in",
+        "role": "Cashier",
+        "timestamp": "2025-05-29 20:24:19"
+    }
+]

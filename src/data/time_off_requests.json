@@ -1,0 +1,12 @@
+[
+    {
+        "id": "req_68385d037995e4.60350220",
+        "username": "cashier1",
+        "fullName": "Jane Doe",
+        "start_date": "2025-05-30",
+        "end_date": "2025-05-31",
+        "reason": "lol",
+        "requested_at": "2025-05-29 21:11:31",
+        "status": "Pending"
+    }
+]

@@ -1,0 +1,26 @@
+[
+    {
+      "username": "cashier1",
+      "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "Cashier",
+      "fullName": "Jane Doe"
+    },
+    {
+      "username": "stocker1",
+      "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "Stocker",
+      "fullName": "John Smith"
+    },
+    {
+      "username": "manager1",
+      "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "Manager",
+      "fullName": "Alice Brown"
+    },
+    {
+      "username": "vendor1",
+      "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+      "role": "Vendor/Supplier",
+      "fullName": "Supplier Inc."
+    }
+]

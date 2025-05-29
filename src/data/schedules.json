@@ -1,0 +1,28 @@
+[
+    {
+        "username": "cashier1",
+        "schedule": [
+            {"day": "Monday", "start_time": "09:00", "end_time": "17:00", "notes": "Opening Shift"},
+            {"day": "Tuesday", "start_time": "09:00", "end_time": "17:00", "notes": ""},
+            {"day": "Wednesday", "start_time": "09:00", "end_time": "13:00", "notes": "Half-day"},
+            {"day": "Friday", "start_time": "13:00", "end_time": "21:00", "notes": "Closing Shift"}
+        ]
+    },
+    {
+        "username": "stocker1",
+        "schedule": [
+            {"day": "Monday", "start_time": "08:00", "end_time": "16:00", "notes": ""},
+            {"day": "Thursday", "start_time": "08:00", "end_time": "16:00", "notes": "Inventory Check"}
+        ]
+    },
+    {
+        "username": "manager1",
+        "schedule": [
+            {"day": "Monday", "start_time": "09:00", "end_time": "18:00", "notes": ""},
+            {"day": "Tuesday", "start_time": "09:00", "end_time": "18:00", "notes": ""},
+            {"day": "Wednesday", "start_time": "09:00", "end_time": "18:00", "notes": ""},
+            {"day": "Thursday", "start_time": "09:00", "end_time": "18:00", "notes": ""},
+            {"day": "Friday", "start_time": "09:00", "end_time": "18:00", "notes": "Admin Day"}
+        ]
+    }
+]

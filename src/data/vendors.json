@@ -1,0 +1,22 @@
+[
+    {
+        "name": "Green Farms Ltd.",
+        "provided_skus": ["APP001", "VEG001", "ORG002", "POT001"]
+    },
+    {
+        "name": "DairyBest Inc.",
+        "provided_skus": ["MILK001", "CHE003", "YOG001", "BUT001"]
+    },
+    {
+        "name": "Bakery Delights",
+        "provided_skus": ["BRD001", "CAK005", "PAS002", "MUF001"]
+    },
+    {
+        "name": "Pantry Goods Co.",
+        "provided_skus": ["PAS001", "RIC001", "OIL001", "SUG001"]
+    },
+    {
+        "name": "Global Beverages",
+        "provided_skus": ["SOD001", "JUI002", "WAT001", "COF001"]
+    }
+]

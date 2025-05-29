@@ -1,0 +1,47 @@
+[
+    {
+        "sku": "APP001",
+        "barcode": "1234567890123",
+        "name": "Fresh Apples (kg)",
+        "description": "Crisp and juicy red apples, sold per kilogram.",
+        "category": "Fruits",
+        "price": 2.99,
+        "cost_price": 1.5,
+        "stock_quantity": 150,
+        "reorder_level": 20,
+        "supplier_info": "Green Farms Ltd.",
+        "default_vendor_name": "Green Farms Ltd.",
+        "date_added": "2024-01-10",
+        "last_updated": "2024-05-20"
+    },
+    {
+        "sku": "MILK001",
+        "barcode": "9876543210987",
+        "name": "Fresh Milk (1L)",
+        "description": "Full cream dairy milk, 1 liter carton.",
+        "category": "Dairy",
+        "price": 1.5,
+        "cost_price": 0.8,
+        "stock_quantity": 122,
+        "reorder_level": 15,
+        "supplier_info": "DairyBest Inc.",
+        "default_vendor_name": "DairyBest Inc.",
+        "date_added": "2024-01-15",
+        "last_updated": "2025-05-29 17:33:37"
+    },
+    {
+        "sku": "BRD001",
+        "barcode": "5432109876543",
+        "name": "Whole Wheat Bread",
+        "description": "Sliced whole wheat bread.",
+        "category": "Bakery",
+        "price": 2.5,
+        "cost_price": 1.2,
+        "stock_quantity": 60,
+        "reorder_level": 10,
+        "supplier_info": "Bakery Delights",
+        "default_vendor_name": "Bakery Delights",
+        "date_added": "2024-01-20",
+        "last_updated": "2024-05-21"
+    }
+]

@@ -1,0 +1,28 @@
+[
+    {
+        "po_id": "PO-20250529-3A3F",
+        "vendor_name": "DairyBest Inc.",
+        "order_date": "2025-05-29 22:13:47",
+        "requested_by": "stocker1",
+        "status": "Received",
+        "items": [
+            {
+                "sku": "MILK001",
+                "product_name": "Fresh Milk (1L)",
+                "quantity_ordered": 123,
+                "quantity_received": 123
+            }
+        ],
+        "delivery_reference_number": null,
+        "last_updated": "2025-05-29 22:16:13",
+        "notes": "",
+        "history": [
+            {
+                "timestamp": "2025-05-29 22:57:27",
+                "user": "stocker1",
+                "action": "Items received. Details: MILK001 (Qty: 123)",
+                "status_change": "Received"
+            }
+        ]
+    }
+]
