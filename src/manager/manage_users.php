@@ -95,10 +95,7 @@ if ($action === 'edit' && isset($_GET['username'])) {
     <title>Manage Users</title>
     <link rel="stylesheet" href="../../public/css/styles.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .table th, .table td { vertical-align: middle; }
-        .form-section { margin-bottom: 2rem; padding: 1.5rem; border: 1px solid #ddd; border-radius: 0.5rem; background-color: #f9f9f9;}
-    </style>
+    <link rel="stylesheet" href="../../public/css/manager_styles.css"> <!-- Added -->
 </head>
 <body>
     <?php include __DIR__ . '/../includes/header.php'; ?>
@@ -118,7 +115,7 @@ if ($action === 'edit' && isset($_GET['username'])) {
             </div>
         <?php endif; ?>
 
-        <!-- Create or Edit User Form Section -->
+        <!-- Add/Edit User Form Section -->
         <div class="form-section">
             <h4><?php echo $userToEdit ? 'Edit User: ' . htmlspecialchars($userToEdit['username']) : 'Create New User'; ?></h4>
             <form action="manage_users.php" method="POST">
@@ -130,22 +127,23 @@ if ($action === 'edit' && isset($_GET['username'])) {
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="username" name="username" value="<?php echo htmlspecialchars($userToEdit['username'] ?? ''); ?>" required>
+                        <input type="text" class="form-control" id="username" name="username" value="<?php echo htmlspecialchars($userToEdit['username'] ?? ''); ?>" <?php echo $userToEdit ? 'readonly' : 'required'; ?>>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="password" class="form-label">Password <?php echo $userToEdit ? '(Leave blank to keep current)' : '<span class="text-danger">*</span>'; ?></label>
-                        <input type="password" class="form-control" id="password" name="password" <?php echo !$userToEdit ? 'required' : ''; ?>>
-                    </div>
-                </div>
-                <div class="row">
                     <div class="col-md-6 mb-3">
                         <label for="fullName" class="form-label">Full Name <span class="text-danger">*</span></label>
                         <input type="text" class="form-control" id="fullName" name="fullName" value="<?php echo htmlspecialchars($userToEdit['fullName'] ?? ''); ?>" required>
                     </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="password" class="form-label">Password <?php echo !$userToEdit ? '<span class="text-danger">*</span>' : '(Leave blank to keep current)'; ?></label>
+                        <input type="password" class="form-control" id="password" name="password" <?php echo !$userToEdit ? 'required' : ''; ?>>
+                    </div>
                     <div class="col-md-6 mb-3">
                         <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
                         <select class="form-select" id="role" name="role" required>
-                            <option value="">Select a role...</option>
+                            <option value="">Select Role...</option>
                             <?php foreach ($allUserRoles as $roleEnum): ?>
                                 <option value="<?php echo $roleEnum->value; ?>" <?php echo (isset($userToEdit['role']) && $userToEdit['role'] === $roleEnum->value) ? 'selected' : ''; ?>>
                                     <?php echo htmlspecialchars($roleEnum->value); ?>
@@ -154,17 +152,19 @@ if ($action === 'edit' && isset($_GET['username'])) {
                         </select>
                     </div>
                 </div>
-                <div class="mb-3" id="associatedVendorSection" style="<?php echo (isset($userToEdit['role']) && $userToEdit['role'] === UserRole::Vendor->value) ? '' : 'display:none;'; ?>">
-                    <label for="associated_vendor_name" class="form-label">Associated Vendor <span class="text-danger">*</span></label>
+                
+                <div class="mb-3" id="vendor_assignment_section" style="display: <?php echo (isset($userToEdit['role']) && $userToEdit['role'] === UserRole::Vendor->value) ? 'block' : 'none'; ?>;">
+                    <label for="associated_vendor_name" class="form-label">Assign to Vendor <span class="text-danger">*</span></label>
                     <select class="form-select" id="associated_vendor_name" name="associated_vendor_name">
-                        <option value="">Select a vendor...</option>
+                        <option value="">Select Vendor...</option>
                         <?php foreach ($allVendors as $vendor): ?>
-                             <option value="<?php echo htmlspecialchars($vendor['name']); ?>" <?php echo (isset($userToEdit['associated_vendor_name']) && $userToEdit['associated_vendor_name'] === $vendor['name']) ? 'selected' : ''; ?>>
+                            <option value="<?php echo htmlspecialchars($vendor['name']); ?>" <?php echo (isset($userToEdit['associated_vendor_name']) && $userToEdit['associated_vendor_name'] === $vendor['name']) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($vendor['name']); ?>
                             </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
+
                 <button type="submit" class="btn btn-primary">
                     <span class="material-symbols-outlined"><?php echo $userToEdit ? 'save' : 'add'; ?></span> <?php echo $userToEdit ? 'Update User' : 'Create User'; ?>
                 </button>
@@ -248,45 +248,6 @@ if ($action === 'edit' && isset($_GET['username'])) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Show/hide Associated Vendor dropdown based on selected role
-        const roleSelect = document.getElementById('role');
-        const vendorSection = document.getElementById('associatedVendorSection');
-        const vendorSelect = document.getElementById('associated_vendor_name');
-
-        if (roleSelect) {
-            roleSelect.addEventListener('change', function() {
-                if (this.value === '<?php echo UserRole::Vendor->value; ?>') {
-                    vendorSection.style.display = 'block';
-                    vendorSelect.required = true;
-                } else {
-                    vendorSection.style.display = 'none';
-                    vendorSelect.required = false;
-                    vendorSelect.value = ''; // Clear selection
-                }
-            });
-            // Trigger change on page load if editing a vendor to set initial state
-            if (roleSelect.value === '<?php echo UserRole::Vendor->value; ?>') {
-                 vendorSection.style.display = 'block';
-                 vendorSelect.required = true;
-            } else {
-                 vendorSection.style.display = 'none';
-                 vendorSelect.required = false;
-            }
-        }
-
-        // Populate username in delete confirmation modal
-        var deleteUserModal = document.getElementById('deleteUserModal');
-        if (deleteUserModal) {
-            deleteUserModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
-                var username = button.getAttribute('data-username-delete');
-                var modalUsernameInput = deleteUserModal.querySelector('#modal_username_delete');
-                var modalUsernameDisplay = deleteUserModal.querySelector('#modal_username_delete_display');
-                modalUsernameInput.value = username;
-                modalUsernameDisplay.textContent = username;
-            });
-        }
-    </script>
+    <script src="../../public/js/manager_scripts.js"></script> <!-- Added -->
 </body>
 </html>

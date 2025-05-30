@@ -1,0 +1,26 @@
+/* Styles moved from src/includes/header.php */
+.material-symbols-outlined {
+    vertical-align: middle; 
+    margin-right: 0.25em; 
+}
+
+.navbar-nav .btn .material-symbols-outlined {
+     margin-right: 0.1em; 
+}
+
+.btn .material-symbols-outlined.no-text { 
+    margin-right: 0;
+}
+
+#liveClock { 
+    font-size: 0.9em;
+    margin-left: 15px;
+    color: #333; /* Example color, adjust as needed */
+}
+
+.dropdown-item.disabled, .dropdown-item:disabled { /* Ensure disabled dropdown items look disabled */
+    pointer-events: none;
+    opacity: 0.65;
+}
+
+/* Add other global layout or header/nav specific styles here */

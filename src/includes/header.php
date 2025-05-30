@@ -57,26 +57,7 @@ if ($userAttendanceStatus) {
 ?>
 <!-- Google Material Symbols -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
-<style>
-    .material-symbols-outlined {
-        vertical-align: middle; 
-        margin-right: 0.25em; 
-    }
-    .navbar-nav .btn .material-symbols-outlined {
-         margin-right: 0.1em; 
-    }
-    .btn .material-symbols-outlined.no-text { 
-        margin-right: 0;
-    }
-    #liveClock { 
-        font-size: 0.9em;
-        margin-left: 15px;
-    }
-    .dropdown-item.disabled, .dropdown-item:disabled { /* Ensure disabled dropdown items look disabled */
-        pointer-events: none;
-        opacity: 0.65;
-    }
-</style>
+<link rel="stylesheet" href="<?php echo $basePath; ?>public/css/layout_styles.css"> <?php // Added ?>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
     <div class="container-fluid">
@@ -164,73 +145,4 @@ if ($userAttendanceStatus) {
         </div>
     </div>
 </nav>
-
-<?php // Modals for Time In/Out Confirmation
-if ($currentUser && in_array($currentUser->getRole(), [UserRole::Cashier, UserRole::Stocker, UserRole::Manager]) && class_exists('AttendanceManager')):
-?>
-<!-- Time In Modal -->
-<div class="modal fade" id="timeInModal" tabindex="-1" aria-labelledby="timeInModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-sm">
-    <div class="modal-content">
-      <form action="<?php echo $basePath; ?>time_in.php" method="POST">
-        <input type="hidden" name="redirect_url" value="<?php echo htmlspecialchars($current_page_url); ?>">
-        <div class="modal-header">
-          <h5 class="modal-title" id="timeInModalLabel"><span class="material-symbols-outlined">login</span> Confirm Time In</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          Are you sure you want to time in now?
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-success">Confirm Time In</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- Time Out Modal -->
-<div class="modal fade" id="timeOutModal" tabindex="-1" aria-labelledby="timeOutModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-sm">
-    <div class="modal-content">
-      <form action="<?php echo $basePath; ?>time_out.php" method="POST">
-        <input type="hidden" name="redirect_url" value="<?php echo htmlspecialchars($current_page_url); ?>">
-        <div class="modal-header">
-          <h5 class="modal-title" id="timeOutModalLabel"><span class="material-symbols-outlined">logout</span> Confirm Time Out</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          Are you sure you want to time out now?
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-warning">Confirm Time Out</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-<?php endif; // End check for modals ?>
-
-<?php
-if (isset($_SESSION['flash_message']) && basename($_SERVER['PHP_SELF']) !== 'index.php' ) {
-    $alertType = $_SESSION['flash_message_type'] ?? 'info'; 
-    echo '<div class="container mt-3"><div class="alert alert-' . htmlspecialchars($alertType) . ' alert-dismissible fade show" role="alert">' . htmlspecialchars($_SESSION['flash_message']) . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div></div>';
-    unset($_SESSION['flash_message']);
-    unset($_SESSION['flash_message_type']); 
-}
-?>
-<script>
-    function updateClock() {
-        const clockElement = document.getElementById('liveClock');
-        if (clockElement) {
-            const now = new Date();
-            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            const dateString = now.toLocaleDateString([], { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
-            clockElement.textContent = `${dateString} ${timeString}`;
-        }
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
-</script>
+<script src="<?php echo $basePath; ?>public/js/global_scripts.js"></script> <?php // Added ?>

@@ -1,0 +1,24 @@
+/* Styles for manager section pages */
+.form-section { 
+    margin-bottom: 2rem; 
+    padding: 1.5rem; 
+    border: 1px solid #ddd; 
+    border-radius: 0.5rem; 
+    background-color: #f9f9f9;
+}
+
+.table th, .table td { 
+    vertical-align: middle; 
+}
+
+/* Styles specific to manage_schedule.php can also go here or in a more specific file if needed */
+.schedule-table th, .schedule-table td { 
+    vertical-align: middle; 
+}
+.time-input { 
+    width: 120px; 
+}
+.nav-tabs .nav-link.active { 
+    background-color: #e9ecef; 
+    border-color: #dee2e6 #dee2e6 #fff; 
+}
