@@ -364,4 +364,149 @@ class PurchaseOrderManager {
             'processed_items' => $processedItemsForInventory // Items to update in inventory
         ];
     }
+    
+    public function getVendors(): array {
+        if (!file_exists($this->vendorsFilePath) || !is_readable($this->vendorsFilePath)) {
+            error_log("PurchaseOrderManager: Vendors file does not exist or is not readable at: " . $this->vendorsFilePath);
+            return [];
+        }
+        $json = file_get_contents($this->vendorsFilePath);
+        if ($json === false) {
+            error_log("PurchaseOrderManager: Failed to read vendors file from: " . $this->vendorsFilePath);
+            return [];
+        }
+        $vendors = json_decode($json, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            error_log("PurchaseOrderManager: JSON decode error for vendors.json: " . json_last_error_msg());
+            return [];
+        }
+        return is_array($vendors) ? $vendors : [];
+    }
+
+    private function saveVendors(array $vendors): bool {
+        $dataDir = dirname($this->vendorsFilePath);
+        if (!is_dir($dataDir)) {
+            mkdir($dataDir, 0775, true);
+        }
+        if (!is_writable($dataDir) || (file_exists($this->vendorsFilePath) && !is_writable($this->vendorsFilePath))) {
+            error_log("PurchaseOrderManager: Vendors data directory or file is not writable: " . $this->vendorsFilePath);
+            return false;
+        }
+        $json = json_encode(array_values($vendors), JSON_PRETTY_PRINT); // Ensure it's a JSON array
+        if ($json === false) {
+            error_log("PurchaseOrderManager: Failed to encode vendors to JSON. Error: " . json_last_error_msg());
+            return false;
+        }
+        return file_put_contents($this->vendorsFilePath, $json, LOCK_EX) !== false;
+    }
+
+    public function getVendorByName(string $vendorName): ?array {
+        $vendors = $this->getVendors();
+        foreach ($vendors as $vendor) {
+            if (isset($vendor['name']) && strtolower($vendor['name']) === strtolower($vendorName)) {
+                return $vendor;
+            }
+        }
+        return null;
+    }
+
+    public function addVendor(string $name, string $contactPerson, string $contactEmail, string $contactPhone, string $address, array $providedSkus = []): array {
+        if (empty(trim($name))) {
+            return ['success' => false, 'message' => 'Vendor name cannot be empty.'];
+        }
+        if ($this->getVendorByName($name)) {
+            return ['success' => false, 'message' => "Vendor with name '{$name}' already exists."];
+        }
+
+        $vendors = $this->getVendors();
+        $newVendor = [
+            'name' => trim($name),
+            'contact_person' => trim($contactPerson),
+            'contact_email' => trim($contactEmail),
+            'contact_phone' => trim($contactPhone),
+            'address' => trim($address),
+            'provided_skus' => array_values(array_unique(array_filter(array_map('trim', $providedSkus)))) // Clean up SKUs
+        ];
+        $vendors[] = $newVendor;
+
+        if ($this->saveVendors($vendors)) {
+            return ['success' => true, 'message' => "Vendor '{$name}' added successfully."];
+        }
+        return ['success' => false, 'message' => "Failed to add vendor '{$name}'."];
+    }
+
+    public function updateVendor(string $originalName, string $newName, string $contactPerson, string $contactEmail, string $contactPhone, string $address, array $providedSkus = []): array {
+        if (empty(trim($newName))) {
+            return ['success' => false, 'message' => 'Vendor name cannot be empty.'];
+        }
+        $vendors = $this->getVendors();
+        $vendorFound = false;
+        $originalNameLower = strtolower($originalName);
+        $newNameLower = strtolower($newName);
+
+        // Check if new name conflicts with another existing vendor (if name changed)
+        if ($originalNameLower !== $newNameLower && $this->getVendorByName($newName)) {
+             return ['success' => false, 'message' => "Another vendor with name '{$newName}' already exists."];
+        }
+
+        foreach ($vendors as $key => $vendor) {
+            if (isset($vendor['name']) && strtolower($vendor['name']) === $originalNameLower) {
+                $vendors[$key]['name'] = trim($newName);
+                $vendors[$key]['contact_person'] = trim($contactPerson);
+                $vendors[$key]['contact_email'] = trim($contactEmail);
+                $vendors[$key]['contact_phone'] = trim($contactPhone);
+                $vendors[$key]['address'] = trim($address);
+                $vendors[$key]['provided_skus'] = array_values(array_unique(array_filter(array_map('trim', $providedSkus))));
+                $vendorFound = true;
+                break;
+            }
+        }
+
+        if (!$vendorFound) {
+            return ['success' => false, 'message' => "Vendor '{$originalName}' not found for update."];
+        }
+
+        if ($this->saveVendors($vendors)) {
+            // If name changed, we might need to update POs. For simplicity, we'll skip this for now.
+            // A more robust system would handle cascading updates or prevent name changes if POs exist.
+            return ['success' => true, 'message' => "Vendor '{$newName}' updated successfully."];
+        }
+        return ['success' => false, 'message' => "Failed to update vendor '{$newName}'."];
+    }
+
+    public function deleteVendor(string $vendorName): array {
+        $vendors = $this->getVendors();
+        $vendorFound = false;
+        $vendorNameLower = strtolower($vendorName);
+
+        // Check for existing Purchase Orders for this vendor
+        $allPOs = $this->getAllPurchaseOrders();
+        foreach ($allPOs as $po) {
+            if (isset($po['vendor_name']) && strtolower($po['vendor_name']) === $vendorNameLower) {
+                return ['success' => false, 'message' => "Cannot delete vendor '{$vendorName}'. They have existing purchase orders. Consider deactivating instead."];
+            }
+        }
+
+        $updatedVendors = [];
+        foreach ($vendors as $vendor) {
+            if (isset($vendor['name']) && strtolower($vendor['name']) === $vendorNameLower) {
+                $vendorFound = true;
+            } else {
+                $updatedVendors[] = $vendor;
+            }
+        }
+
+        if (!$vendorFound) {
+            return ['success' => false, 'message' => "Vendor '{$vendorName}' not found for deletion."];
+        }
+
+        if ($this->saveVendors($updatedVendors)) {
+            return ['success' => true, 'message' => "Vendor '{$vendorName}' deleted successfully."];
+        }
+        return ['success' => false, 'message' => "Failed to delete vendor '{$vendorName}'."];
+    }
+
+    public function getProductsByVendor($vendorName) {
+        // ... existing code ...
+    }
 }

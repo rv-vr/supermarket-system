@@ -1,12 +1,12 @@
 <?php
 require_once __DIR__ . '/src/classes/UserRole.php';
 require_once __DIR__ . '/src/classes/User.php';
+require_once __DIR__ . '/src/classes/TimeOffManager.php'; // Include the TimeOffManager
 
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-// Set the default timezone (important for date consistency)
 date_default_timezone_set('Asia/Manila');
 
 if (!isset($_SESSION['user']) || !($_SESSION['user'] instanceof User)) {
@@ -15,34 +15,19 @@ if (!isset($_SESSION['user']) || !($_SESSION['user'] instanceof User)) {
 }
 $user = $_SESSION['user'];
 $username = $user->getUsername();
-$fullName = $user->getFullName(); // Get full name for the request
+$fullName = $user->getFullName(); 
 
 $feedbackMessage = '';
 $feedbackType = '';
-$timeOffRequestsFile = __DIR__ . '/src/data/time_off_requests.json';
 
-// Function to load requests
-function loadTimeOffRequests(string $filePath): array {
-    if (!file_exists($filePath) || !is_readable($filePath)) {
-        return [];
-    }
-    $json = file_get_contents($filePath);
-    return json_decode($json, true) ?? [];
-}
-
-// Function to save requests
-function saveTimeOffRequests(string $filePath, array $requests): bool {
-    return file_put_contents($filePath, json_encode($requests, JSON_PRETTY_PRINT));
-}
-
+$timeOffManager = new TimeOffManager(); // Instantiate the manager
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $startDate = $_POST['start_date'] ?? null;
     $endDate = $_POST['end_date'] ?? null;
     $reason = trim($_POST['reason'] ?? '');
-    $requestTimestamp = date('Y-m-d H:i:s');
+    // $requestTimestamp = date('Y-m-d H:i:s'); // TimeOffManager handles this
 
-    // Basic Validation
     if (empty($startDate) || empty($endDate) || empty($reason)) {
         $feedbackMessage = "All fields (Start Date, End Date, Reason) are required.";
         $feedbackType = "danger";
@@ -53,43 +38,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $feedbackMessage = "Start Date cannot be in the past.";
         $feedbackType = "danger";
     } else {
-        $allRequests = loadTimeOffRequests($timeOffRequestsFile);
-        $newRequest = [
-            'id' => uniqid('req_', true), // Unique ID for the request
-            'username' => $username,
-            'fullName' => $fullName,
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-            'reason' => htmlspecialchars($reason), // Sanitize reason
-            'requested_at' => $requestTimestamp,
-            'status' => 'Pending' // Default status
-        ];
+        // Use TimeOffManager to submit the request
+        $result = $timeOffManager->submitRequest($username, $startDate, $endDate, $reason);
 
-        $allRequests[] = $newRequest;
-
-        if (saveTimeOffRequests($timeOffRequestsFile, $allRequests)) {
-            $feedbackMessage = "Time off request submitted successfully. Status: Pending.";
+        if ($result['success']) {
+            $feedbackMessage = $result['message']; // "Time off request submitted successfully. Status: Pending."
             $feedbackType = "success";
         } else {
-            $feedbackMessage = "Error submitting your request. Please try again.";
+            $feedbackMessage = $result['message'] ?? "Error submitting your request. Please try again.";
             $feedbackType = "danger";
         }
     }
 }
 
-// Load user's existing requests for display
-$allUserRequests = [];
-$loadedRequests = loadTimeOffRequests($timeOffRequestsFile);
-foreach ($loadedRequests as $req) {
-    if (isset($req['username']) && $req['username'] === $username) {
-        $allUserRequests[] = $req;
-    }
-}
-// Sort by requested_at descending
-usort($allUserRequests, function ($a, $b) {
-    return strtotime($b['requested_at']) - strtotime($a['requested_at']);
-});
-
+// Load user's existing requests for display using TimeOffManager
+// The getAllRequests method in TimeOffManager already sorts by requested_on descending.
+$allUserRequests = $timeOffManager->getAllRequests(null, $username);
 
 ?>
 <!DOCTYPE html>
@@ -103,7 +67,7 @@ usort($allUserRequests, function ($a, $b) {
     <style>
         .status-pending { color: orange; font-weight: bold; }
         .status-approved { color: green; font-weight: bold; }
-        .status-rejected { color: red; font-weight: bold; }
+        .status-denied { color: red; font-weight: bold; } /* Changed from rejected to denied for consistency */
         .request-history-table th, .request-history-table td { vertical-align: middle; }
     </style>
 </head>
@@ -161,12 +125,14 @@ usort($allUserRequests, function ($a, $b) {
                                     <th>End Date</th>
                                     <th>Reason</th>
                                     <th>Status</th>
+                                    <th>Action By</th>
+                                    <th>Action On</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <?php foreach ($allUserRequests as $request): ?>
                                     <tr>
-                                        <td><?php echo htmlspecialchars(date('M d, Y H:i', strtotime($request['requested_at']))); ?></td>
+                                        <td><?php echo htmlspecialchars(date('M d, Y H:i', strtotime($request['requested_on']))); ?></td>
                                         <td><?php echo htmlspecialchars(date('M d, Y', strtotime($request['start_date']))); ?></td>
                                         <td><?php echo htmlspecialchars(date('M d, Y', strtotime($request['end_date']))); ?></td>
                                         <td><?php echo nl2br(htmlspecialchars($request['reason'])); ?></td>
@@ -175,6 +141,8 @@ usort($allUserRequests, function ($a, $b) {
                                                 <?php echo htmlspecialchars($request['status']); ?>
                                             </span>
                                         </td>
+                                        <td><?php echo htmlspecialchars($request['action_taken_by'] ?? 'N/A'); ?></td>
+                                        <td><?php echo isset($request['action_taken_on']) ? htmlspecialchars(date('M d, Y H:i', strtotime($request['action_taken_on']))) : 'N/A'; ?></td>
                                     </tr>
                                 <?php endforeach; ?>
                             </tbody>
@@ -190,7 +158,6 @@ usort($allUserRequests, function ($a, $b) {
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Optional: JavaScript to ensure end_date is not before start_date dynamically
         const startDateInput = document.getElementById('start_date');
         const endDateInput = document.getElementById('end_date');
 
@@ -203,7 +170,6 @@ usort($allUserRequests, function ($a, $b) {
                     }
                 }
             });
-            // Set initial min for end_date if start_date has a value on load (e.g. after form error)
             if (startDateInput.value) {
                  endDateInput.min = startDateInput.value;
             }

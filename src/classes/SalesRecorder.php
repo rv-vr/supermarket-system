@@ -26,10 +26,15 @@ class SalesRecorder
     private function saveSales(array $sales): bool
     {
         if (!is_writable(dirname($this->salesFilePath)) || (file_exists($this->salesFilePath) && !is_writable($this->salesFilePath))) {
+            error_log("SalesRecorder: Sales data directory or file is not writable."); // Added error log
             return false;
         }
         $json = json_encode($sales, JSON_PRETTY_PRINT);
-        return file_put_contents($this->salesFilePath, $json) !== false;
+        if ($json === false) {
+            error_log("SalesRecorder: Failed to encode sales to JSON. Error: " . json_last_error_msg());
+            return false;
+        }
+        return file_put_contents($this->salesFilePath, $json, LOCK_EX) !== false; // Added LOCK_EX
     }
 
     public function recordSale(
@@ -43,22 +48,9 @@ class SalesRecorder
         $sales = $this->loadSales();
         $saleId = "S" . date("YmdHis") . substr(uniqid(), -4); // Unique Sale ID
 
-        $saleEntry = [
-            "sale_id" => $saleId,
-            "timestamp" => date("Y-m-d H:i:s"),
-            "cashier_username" => $cashierUsername,
-            "items" => [],
-            "total_amount" => round($totalAmount, 2),
-            "payment_details" => [
-                "method" => $paymentMethod,
-                "amount_given" => ($paymentMethod === 'Cash' && $amountGiven !== null) ? round($amountGiven, 2) : null,
-                "change_due" => ($paymentMethod === 'Cash' && $amountGiven !== null && $amountGiven >= $totalAmount) ? round($amountGiven - $totalAmount, 2) : null,
-                "reference_number" => $referenceNumber
-            ]
-        ];
-
+        $itemsForRecord = []; // Initialize the structured items array
         foreach ($cartItems as $item) {
-            $saleEntry['items'][] = [
+            $itemsForRecord[] = [
                 "sku" => $item['sku'],
                 "name" => $item['name'],
                 "quantity" => $item['quantity'],
@@ -67,7 +59,19 @@ class SalesRecorder
             ];
         }
 
-        $sales[] = $saleEntry;
+        $newSale = [
+            'transaction_id' => uniqid('sale_'),
+            'timestamp' => date('Y-m-d H:i:s'),
+            'cashier_username' => $cashierUsername,
+            'items' => $itemsForRecord, // Use the structured items
+            'total_amount' => $totalAmount,
+            'payment_method' => $paymentMethod,
+            'amount_given' => $amountGiven,
+            'change_due' => ($paymentMethod === 'Cash' && $amountGiven !== null) ? ($amountGiven - $totalAmount) : null,
+            'reference_number' => $referenceNumber
+        ];
+
+        $sales[] = $newSale;
         return $this->saveSales($sales);
     }
 

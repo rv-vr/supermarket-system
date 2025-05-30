@@ -153,4 +153,8 @@ class AttendanceManager {
         $summary['total_timed_in_days'] = count($timedInDays);
         return $summary;
     }
+
+    public function getAllTimeLogs(): array {
+        return $this->loadTimeLogs(); // Simply return all loaded logs
+    }
 }

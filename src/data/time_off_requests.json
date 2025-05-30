@@ -1,12 +1,46 @@
 [
     {
-        "id": "req_68385d037995e4.60350220",
+        "request_id": "TOR20250601100000test",
         "username": "cashier1",
-        "fullName": "Jane Doe",
-        "start_date": "2025-05-30",
-        "end_date": "2025-05-31",
-        "reason": "lol",
-        "requested_at": "2025-05-29 21:11:31",
-        "status": "Pending"
+        "start_date": "2025-06-15",
+        "end_date": "2025-06-16",
+        "reason": "Personal appointment",
+        "status": "Approved",
+        "requested_on": "2025-06-01 10:00:00",
+        "action_taken_by": "manager1",
+        "action_taken_on": "2025-05-30 08:08:50"
+    },
+    {
+        "request_id": "TOR20250602110000exam",
+        "username": "stocker1",
+        "start_date": "2025-07-01",
+        "end_date": "2025-07-03",
+        "reason": "University exams",
+        "status": "Approved",
+        "requested_on": "2025-06-02 11:00:00",
+        "action_taken_by": "manager1",
+        "action_taken_on": "2025-05-30 08:08:51"
+    },
+    {
+        "request_id": "TOR20250520090000done",
+        "username": "cashier1",
+        "start_date": "2025-05-25",
+        "end_date": "2025-05-25",
+        "reason": "Doctor's visit",
+        "status": "Approved",
+        "requested_on": "2025-05-20 09:00:00",
+        "action_taken_by": "manager",
+        "action_taken_on": "2025-05-20 14:00:00"
+    },
+    {
+        "request_id": "TOR2025053008082707a0",
+        "username": "cashier1",
+        "start_date": "2025-06-01",
+        "end_date": "2026-06-01",
+        "reason": "I quit",
+        "status": "Denied",
+        "requested_on": "2025-05-30 08:08:27",
+        "action_taken_by": "manager1",
+        "action_taken_on": "2025-05-30 08:08:48"
     }
 ]

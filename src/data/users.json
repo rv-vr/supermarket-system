@@ -1,55 +1,61 @@
 [
     {
-      "username": "cashier1",
-      "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
-      "role": "Cashier",
-      "fullName": "Jane Doe"
+        "username": "cashier1",
+        "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+        "role": "Cashier",
+        "fullName": "Jane Doe"
     },
     {
-      "username": "stocker1",
-      "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
-      "role": "Stocker",
-      "fullName": "John Smith"
+        "username": "stocker1",
+        "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+        "role": "Stocker",
+        "fullName": "John Smith"
     },
     {
-      "username": "manager1",
-      "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
-      "role": "Manager",
-      "fullName": "Alice Brown"
+        "username": "manager1",
+        "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+        "role": "Manager",
+        "fullName": "Alice Brown"
     },
     {
-      "username": "vendor1",
-      "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
-      "role": "Vendor/Supplier",
-      "fullName": "Supplier Inc.",
-      "associated_vendor_name": "Green Farms Ltd."
+        "username": "vendor1",
+        "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+        "role": "Vendor/Supplier",
+        "fullName": "Supplier Inc.",
+        "associated_vendor_name": "Green Farms Ltd."
     },
     {
-      "username": "dairybestuser",
-      "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
-      "role": "Vendor/Supplier",
-      "fullName": "DairyBest Inc.",
-      "associated_vendor_name": "DairyBest Inc."
+        "username": "dairybestuser",
+        "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+        "role": "Vendor/Supplier",
+        "fullName": "DairyBest Inc.",
+        "associated_vendor_name": "DairyBest Inc."
     },
     {
-      "username": " ",
-      "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
-      "role": "Vendor/Supplier",
-      "fullName": "Bakery Delights",
-      "associated_vendor_name": "Bakery Delights"
+        "username": "bakerydelightsuser",
+        "password": "$2y$10$ry7NfWqWgdgxAou9cTVf1ehrFnKSHWeZGBIvtA7ap4/WS3.bnGbi.",
+        "role": "Vendor/Supplier",
+        "fullName": "Bakery Delights",
+        "associated_vendor_name": "Bakery Delights"
     },
     {
-      "username": "pantrygoodscouser",
-      "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
-      "role": "Vendor/Supplier",
-      "fullName": "Pantry Goods Co.",
-      "associated_vendor_name": "Pantry Goods Co."
+        "username": "pantrygoodscouser",
+        "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+        "role": "Vendor/Supplier",
+        "fullName": "Pantry Goods Co.",
+        "associated_vendor_name": "Pantry Goods Co."
     },
     {
-      "username": "globalbeveragesuser",
-      "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
-      "role": "Vendor/Supplier",
-      "fullName": "Global Beverages",
-      "associated_vendor_name": "Global Beverages"
+        "username": "globalbeveragesuser",
+        "password": "$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+        "role": "Vendor/Supplier",
+        "fullName": "Global Beverages",
+        "associated_vendor_name": "Global Beverages"
+    },
+    {
+        "username": "cashier2",
+        "password": "$2y$10$8kPz5W8PUWjaUX4s5z0J4uarDQ7.DpxXQo1aH7C1khg2hlC2T1XVm",
+        "fullName": "Vince Omar",
+        "role": "Cashier"
     }
 ]
